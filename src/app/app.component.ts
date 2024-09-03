@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { SearchService } from './services/search.service';
-import { debounceTime, switchMap, filter, distinctUntilChanged, combineLatest, map } from 'rxjs';
+import { debounceTime, switchMap, filter, distinctUntilChanged, combineLatest, map, catchError } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
-// Define types for user details and posts
 interface UserDetails {
   id: number;
   name: string;
@@ -30,20 +29,29 @@ export class AppComponent implements OnInit {
 
   searchControl = new FormControl('');
   results: string[] = [];
+  errorMessage: string = '';
   combinedData$!: Observable<{ name: string; email: string; posts: UserPost[] }>;
 
   constructor(private searchService: SearchService) {
-    // Task 1: Implement Debounced Search
+    // Task 1: Implement Debounced Search with Error Handling
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       filter((term: string | null): term is string => term !== null && term.length >= 3),
-      switchMap(term => this.searchService.search(term))
-    ).subscribe(results => this.results = results);
+      switchMap(term => this.searchService.search(term).pipe(
+        catchError(error => {
+          this.errorMessage = 'Search error occurred!';
+          return of([]);
+        })
+      ))
+    ).subscribe(results => {
+      this.results = results;
+      this.errorMessage = results.length === 0 ? this.errorMessage : '';
+    });
   }
 
   ngOnInit() {
-    // Task 2: Combine Data from Multiple Endpoints using combineLatest operator
+    // Task 2: Combine Data from Multiple Endpoints with Error Handling
     this.combinedData$ = combineLatest([
       this.searchService.getUserDetails(),
       this.searchService.getUserPosts()
@@ -51,7 +59,11 @@ export class AppComponent implements OnInit {
       map(([userDetails, userPosts]) => ({
         ...userDetails,
         posts: userPosts.filter((post: UserPost) => post.userId === userDetails.id)
-      }))
+      })),
+      catchError(error => {
+        this.errorMessage = 'Data combination error occurred!';
+        return of({ name: '', email: '', posts: [] });
+      })
     );
   }
 }
