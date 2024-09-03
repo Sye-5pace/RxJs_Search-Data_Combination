@@ -6,11 +6,15 @@
       placeholder="Search..."
       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
     />
+
+    <!-- Display loading indicator for search -->
+    <div *ngIf="isLoadingSearch" class="text-blue-500">Loading search results...</div>
+
     <div class="max-w-md mx-auto mt-5">
       <!-- Display error message for search -->
       <div *ngIf="errorMessage" class="text-red-500">{{ errorMessage }}</div>
       <ul class="mt-3 space-y-2">
-        @if(results.length === 0 && !errorMessage) {
+        @if(results.length === 0 && !errorMessage && !isLoadingSearch) {
           <li class="text-gray-500">No results found.</li>
         }
         @for(result of results; track result;) {
@@ -20,14 +24,16 @@
     </div>
   </div>
   <div>
-    <!-- task 2 -->
+    <!-- Display loading indicator for combined data -->
+    <div *ngIf="isLoadingCombinedData" class="text-blue-500">Loading user data...</div>
+
+    <!-- Combined data display -->
     <div *ngIf="combinedData$ | async as combinedData" class="mt-5 p-4 bg-gray-50 rounded-md shadow-md">
       <h2 class="text-xl font-semibold">{{ combinedData.name }}'s Profile</h2>
       <p class="text-gray-700">Email: {{ combinedData.email }}</p>
-
       <h3 class="mt-4 text-lg font-semibold">Posts:</h3>
       <ul class="space-y-2">
-        @if(combinedData.posts.length === 0 && !errorMessage) {
+        @if(combinedData.posts.length === 0 && !errorMessage && !isLoadingCombinedData) {
           <li class="text-gray-500">No posts found.</li>
         }
         @for(post of combinedData.posts; track post) {
@@ -38,6 +44,7 @@
         }
       </ul>
     </div>
+
     <!-- Display error message for combined data -->
     <div *ngIf="errorMessage" class="text-red-500 mt-4">{{ errorMessage }}</div>
   </div>

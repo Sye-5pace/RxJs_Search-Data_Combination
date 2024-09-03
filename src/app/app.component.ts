@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { SearchService } from './services/search.service';
-import { debounceTime, switchMap, filter, distinctUntilChanged, combineLatest, map, catchError } from 'rxjs';
+import { debounceTime, switchMap, filter, distinctUntilChanged, combineLatest, map, catchError, finalize } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Observable, of } from 'rxjs';
 
@@ -30,28 +30,35 @@ export class AppComponent implements OnInit {
   searchControl = new FormControl('');
   results: string[] = [];
   errorMessage: string = '';
+  isLoadingSearch: boolean = false;
+  isLoadingCombinedData: boolean = false;
   combinedData$!: Observable<{ name: string; email: string; posts: UserPost[] }>;
 
-  constructor(private searchService: SearchService) {
-    // Task 1: Implement Debounced Search with Error Handling
+  constructor(private searchService: SearchService) {}
+
+  ngOnInit() {
+    // Task 1: Implement Debounced Search with Error Handling and Loading State
     this.searchControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
       filter((term: string | null): term is string => term !== null && term.length >= 3),
-      switchMap(term => this.searchService.search(term).pipe(
-        catchError(error => {
-          this.errorMessage = 'Search error occurred!';
-          return of([]);
-        })
-      ))
+      switchMap(term => {
+        this.isLoadingSearch = true;
+        return this.searchService.search(term).pipe(
+          catchError(error => {
+            this.errorMessage = 'Search error occurred!';
+            return of([]);
+          }),
+          finalize(() => this.isLoadingSearch = false)
+        );
+      })
     ).subscribe(results => {
       this.results = results;
       this.errorMessage = results.length === 0 ? this.errorMessage : '';
     });
-  }
 
-  ngOnInit() {
-    // Task 2: Combine Data from Multiple Endpoints with Error Handling
+    // Task 2: Combine Data from Multiple Endpoints with Error Handling and Loading State
+    this.isLoadingCombinedData = true;
     this.combinedData$ = combineLatest([
       this.searchService.getUserDetails(),
       this.searchService.getUserPosts()
@@ -63,7 +70,8 @@ export class AppComponent implements OnInit {
       catchError(error => {
         this.errorMessage = 'Data combination error occurred!';
         return of({ name: '', email: '', posts: [] });
-      })
+      }),
+      finalize(() => this.isLoadingCombinedData = false)
     );
   }
 }
