@@ -45,14 +45,9 @@ export class SearchService {
       return throwError(() => new Error('User posts API error occurred!'));
     }
     const userPosts = [
-      { userId: 1,
-        title: 'First Post',
-        content: 'Exploring the beauty of nature during my hike this weekend.'
-      },
-      { userId: 2,
-        title: 'Second Post',
-        content: 'Just finished reading an amazing book on the history of technology.'
-      }
+      { userId: 1, title: 'First Post', content: 'Exploring the beauty of nature during my hike this weekend.' },
+      { userId: 1, title: 'Second Post', content: 'Just finished reading an amazing book on the history of technology.' }
+      
     ];
     return of(userPosts).pipe(
       delay(800),
