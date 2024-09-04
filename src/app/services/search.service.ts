@@ -13,8 +13,8 @@ export class SearchService {
     if (Math.random() < 0.2) {
       return throwError(() => new Error('Search API error occurred!'));
     }
-    const mockResults = ['apple', 'banana', 'cherry', 'date', 'elderberry']
-      .filter(fruit => fruit.includes(term));
+    const mockResults = ['New York', 'London', 'Tokyo', 'Paris', 'Sydney']
+      .filter(city => city.includes(term));
     return of(mockResults).pipe(
       delay(500),
       catchError(error => {
@@ -29,7 +29,7 @@ export class SearchService {
     if (Math.random() < 0.2) {
       return throwError(() => new Error('User details API error occurred!'));
     }
-    const userDetails = { id: 1, name: 'John Doe', email: 'john.doe@example.com' };
+    const userDetails = { id: 1, name: 'Alice Hoefstde', email: 'alice.hoesftde@example.com' };
     return of(userDetails).pipe(
       delay(700),
       catchError(error => {
@@ -45,8 +45,14 @@ export class SearchService {
       return throwError(() => new Error('User posts API error occurred!'));
     }
     const userPosts = [
-      { userId: 1, title: 'First Post', content: 'This is the content of the first post.' },
-      { userId: 1, title: 'Second Post', content: 'This is the content of the second post.' }
+      { userId: 1,
+        title: 'First Post',
+        content: 'Exploring the beauty of nature during my hike this weekend.'
+      },
+      { userId: 2,
+        title: 'Second Post',
+        content: 'Just finished reading an amazing book on the history of technology.'
+      }
     ];
     return of(userPosts).pipe(
       delay(800),
