@@ -14,7 +14,7 @@ export class SearchService {
       return throwError(() => new Error('Search API error occurred!'));
     }
     const mockResults = ['New York', 'London', 'Tokyo', 'Paris', 'Sydney']
-      .filter(city => city.includes(term));
+      filter(city => city.includes(term));
     return of(mockResults).pipe(
       delay(500),
       catchError(error => {
